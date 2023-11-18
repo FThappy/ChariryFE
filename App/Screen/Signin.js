@@ -10,11 +10,12 @@ import {
 } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 import { MaterialIcons } from "@expo/vector-icons";
-import { FontAwesome } from "@expo/vector-icons";
-import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { AntDesign } from "@expo/vector-icons";
 import { publicRequest } from "../../requestMethods";
+import CryptoJS from "react-native-crypto-js";
+import {PASS_SEC} from "@env";
+import Toast from "react-native-toast-message";
 
 const type = ["Person", "Company"];
 const screenWidth = Dimensions.get("window").width;
@@ -24,7 +25,7 @@ const Signin = ({ navigation }) => {
   const [inputs, setInputs] = useState({});
 
   const handleChange = (text,name) => {
-    console.log(text,name);
+ 
     setInputs((prev) => {
       return {
         ...prev,
@@ -34,22 +35,40 @@ const Signin = ({ navigation }) => {
   };
   const handleSubmit = () => {
     if(inputs.username && inputs.password && inputs.address && inputs.type && inputs.email && inputs.phone){
+      const _password = CryptoJS.AES.encrypt(
+        inputs.password,
+        PASS_SEC
+      ).toString();
+      inputs.password = _password;
       const register = async () => {
         try {
           const res = await publicRequest.post("/auth/register", inputs);
           if (res.status === 201) {
             // Handle successful registration
             console.log("Registration successful");
+            // navigation.navigate("AccessRegister");
           } else {
             // Handle registration error
             console.error("Registration failed");
           }
         } catch (error) {
-          // Handle network error
-          console.error("Network error:", JSON.stringify(error));
+          if (error.response?.data && error.response?.data.code === 3) {
+            Toast.show({
+              type: "error",
+              text1: "Xảy ra lỗi trong quá trình xử lý",
+              text2: "Vui lòng thử lại",
+            });
+          }
         }
       };
       register();
+    }
+    else {
+      Toast.show({
+        type: "warning",
+        text1: "Hãy điền đầy đủ thông tin",
+        text2: "Vui lòng thử lại",
+      });
     }
   }
 
@@ -141,6 +160,8 @@ const Signin = ({ navigation }) => {
             <Text style={styles.label}>Password</Text>
             <TextInput
               style={styles.input}
+              autoCapitalize="none"
+              secureTextEntry={true}
               placeholder="Ex : ***************"
               placeholderTextColor="#A9A9A9"
               onChangeText={(text) => handleChange(text, "password")}
@@ -232,7 +253,7 @@ const styles = StyleSheet.create({
   },
   input: {
     color: "black",
-    fontWeight: "100",
+    fontWeight: "bold",
     width: "100%",
     height: 35,
     borderBottomWidth: 2,

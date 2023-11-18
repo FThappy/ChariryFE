@@ -16,8 +16,7 @@ import { useNavigation } from "@react-navigation/native";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
-console.log("Chiều rộng màn hình:", screenWidth);
-console.log("Chiều cao màn hình:", screenHeight);
+
 
 export default function Search() {
   const navigation = useNavigation();
@@ -62,7 +61,7 @@ export default function Search() {
         <FlatList
           data={fakeData}
           renderItem={({ item }) => {
-            console.log(item);
+            // console.log(item);
 
             return (
               <SafeAreaView style={styles.bannerContainer} key={item.id}>

@@ -17,9 +17,7 @@ export default function TabNavigation() {
   const Tab = createBottomTabNavigator();
   
   const getTabBarVisibility = (route) => {
-    console.log(route);
     const routeName = getFocusedRouteNameFromRoute(route)
-    console.log(routeName);
     if (
       routeName?.includes("Item") ||
       routeName?.includes("Donation") ||

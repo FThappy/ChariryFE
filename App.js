@@ -11,6 +11,8 @@ import { Provider } from 'react-redux';
 import { persistor, store } from './App/service/store';
 import { PersistGate } from "redux-persist/integration/react";
 import { useSelector } from "react-redux";
+import Toast from 'react-native-toast-message';
+import ToastConfig from './App/Components/ToastConfig';
 
 
  const Stack = createNativeStackNavigator();
@@ -22,6 +24,7 @@ const Navigators = ()=>{
   return (
     <NavigationContainer>
       {user ? <MainStack /> : <LoginStack />}
+      <Toast config={ToastConfig} />
     </NavigationContainer>
   );
 }

@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { current } from "./../../node_modules/immer/compat/pre-3.7/dist/immer.d";
 
 const userSlice = createSlice({
   name: "user",
@@ -16,15 +15,29 @@ const userSlice = createSlice({
       state.currentUser = action.payload;
       state.isFectching = false;
     },
-    loginFailure: (state, action) => {
+    loginFailure: (state) => {
       state.isFectching = false;
       state.error = true;
     },
-    logoutUser : (state) => {
+    logoutUser: (state) => {
       state.isFectching = false;
       state.currentUser = null;
       state.error = false;
-    }
+    },
+    updateImageStart: (state) => {
+      state.isFectching = false;
+    },
+    updateImageSuccess: (state, action) => {
+      state.currentUser = {
+        ...action.payload,
+        accessToken: state.currentUser.accessToken,
+      };
+      state.isFectching = false;
+    },
+    updateImageFailure: (state) => {
+      state.isFectching = false;
+      state.error = true;
+    },
   },
 });
 export const {
@@ -32,8 +45,8 @@ export const {
   loginSuccess,
   loginFailure,
   logoutUser,
-  updateUserStart,
-  updateUserSuccess,
-  updateUserFailure,
+  updateImageStart,
+  updateImageSuccess,
+  updateImageFailure
 } = userSlice.actions;
 export default userSlice.reducer;

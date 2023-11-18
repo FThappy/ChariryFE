@@ -14,6 +14,11 @@ import { FadeInUp, FadeOut } from "react-native-reanimated";
 import { login } from "../service/apiCalls";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
+import backgroundpic from "../../assets/signin-logo.png";
+import {PASS_SEC} from "@env";
+import CryptoJS from "react-native-crypto-js";
+import Toast from "react-native-toast-message";
+
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -23,7 +28,6 @@ const Login = ({ navigation }) => {
   const dispatch = useDispatch();
 
   const handleChange = (text, name) => {
-    console.log(text, name);
     setInputs((prev) => {
       return {
         ...prev,
@@ -31,11 +35,43 @@ const Login = ({ navigation }) => {
       };
     });
   };
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
+    const _password = CryptoJS.AES.encrypt(
+        inputs.password,
+        PASS_SEC
+      ).toString();
+      inputs.password = _password;
     e.preventDefault();
-    login(dispatch, inputs);
+    try {
+      const res = await login(dispatch, inputs);
+      console.log(res)
+    } catch (error) {
+      if (error.response?.data && error.response?.data.code === 1){
+        Toast.show({
+          type: "warning",
+          text1: "Tên đăng nhập không tồn tại",
+          text2: "Vui lòng kiểm tra lại tên đăng nhập ",
+        });
+      }
+      if (error.response?.data && error.response?.data.code === 2) {
+        Toast.show({
+          type: "warning",
+          text1: "Sai mật khẩu hoặc tài khoản",
+          text2: "Vui lòng kiểm tra lại tên đăng nhập và mật khẩu ",
+        }); 
+      }
+      if (error.response?.data && error.response?.data.code === 3) {
+        Toast.show({
+          type: "error",
+          text1: "Xảy ra lỗi trong quá trình đăng nhập",
+          text2: "Vui lòng đăng nhập lại",
+        });
+      }
+      
+    }
+    
   };
-  const user = useSelector((state) => console.log(state));
+  // const user = useSelector((state) => console.log(state));
 
   return (
     <View style={styles.container}>
@@ -49,9 +85,7 @@ const Login = ({ navigation }) => {
           entering={FadeInUp.delay(200).duration(1000).springify()}
           style={styles.image}
           accessibilityLabel="User Image"
-          source={{
-            uri: "https://cdn-icons-png.flaticon.com/128/2514/2514917.png?ga=GA1.1.1124457332.1696837885",
-          }}
+          source={backgroundpic}
           resizeMode="contain"
         />
         <TextInput
@@ -62,6 +96,8 @@ const Login = ({ navigation }) => {
         />
         <TextInput
           style={styles.input2}
+          autoCapitalize="none"
+          secureTextEntry={true}
           placeholder="Password"
           placeholderTextColor="#A9A9A9"
           onChangeText={(text) => handleChange(text, "password")}
